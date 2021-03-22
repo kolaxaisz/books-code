@@ -1,0 +1,82 @@
+<template>
+  <q-page class="q-pa-md row justify-center">
+    <q-chat-message
+      v-for="message in currentMessages"
+      :ref="`${message.id}`"
+      :key="message.id"
+      :stamp="message.createdAt"
+      :text="[message.content]"
+      :sent="getUser.id === message.authorId"
+      :name="message.author.name"
+      class="col-12"
+    >
+      <template v-slot:avatar>
+        <avatar-display
+          :avatar-object="message.author.avatar"
+          :name="message.author.name"
+          tag="img"
+          class="q-message-avatar"
+          :class="getUser.id !== message.authorId
+          ? 'q-message-avatar--received'
+          : 'q-message-avatar--sent'"
+        />
+      </template>
+    </q-chat-message>
+  </q-page>
+</template>
+
+<script>
+import { mapActions, mapGetters } from 'vuex';
+import { date } from 'quasar';
+
+export default {
+  name: 'MessagesPage',
+  components: {
+    AvatarDisplay: () => import('components/AvatarDisplay'),
+  },
+  data: () => ({
+    interval: null,
+  }),
+  async beforeMount() {
+    this.interval = setInterval(async () => {
+      await this.fetchNewMessages({
+        conversationId: this.$route.params.id,
+      });
+    }, 1000);
+  },
+  beforeDestroy() {
+    clearInterval(this.timeout);
+    this.timeout = null;
+  },
+  watch: {
+    currentMessages: {
+      handler(newValue, oldValue) {
+        if (newValue.length > oldValue.length) {
+          setTimeout(() => {
+            const lastMessage = [...newValue].pop();
+            const [{ $el: el }] = this.$refs[`${lastMessage.id}`];
+            el.scrollIntoView();
+          }, 250);
+        }
+      },
+      deep: true,
+      immediate: false,
+    },
+  },
+  computed: {
+    ...mapGetters('chat', ['getChatMessages']),
+    ...mapGetters('user', ['getUser']),
+    currentMessages() {
+      const messages = this.getChatMessages(this.$route.params.id);
+      if (!messages.length) return [];
+      return messages.map((m) => ({
+        ...m,
+        createdAt: date.formatDate(new Date(parseInt(m.createdAt, 10)), 'YYYY/MM/DD HH:mm:ss'),
+      }));
+    },
+  },
+  methods: {
+    ...mapActions('chat', ['fetchNewMessages']),
+  },
+};
+</script>
