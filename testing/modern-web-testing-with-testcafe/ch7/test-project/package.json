@@ -1,0 +1,17 @@
+{
+  "name": "test-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test-ci": "testcafe chrome tests/basic-tests.js --quarantine-mode",
+    "test-debug": "testcafe chrome tests/basic-tests.js --debug-on-fail --speed 0.8"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "js-automation-tools": "^1.0.5",
+    "testcafe": "^1.8.7"
+  }
+}
