@@ -8,3 +8,10 @@
     <Nuxt />
   </div>
 </template>
+<script>
+export default {
+  mounted() {
+    this.$getCurrentScreenSize()
+  },
+}
+</script>
